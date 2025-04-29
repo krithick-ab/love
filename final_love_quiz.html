@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Our Love Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(to bottom right, #fff6f9, #ffe6eb);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .background-decor {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* Floating abstract blobs */
+        .abstract-blob {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255, 182, 193, 0.2), transparent);
+            border-radius: 60% 40% 30% 70% / 50% 30% 70% 50%;
+            animation: slowFloat 10s ease-in-out infinite alternate;
+        }
+        .abstract-blob:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 5%; }
+        .abstract-blob:nth-child(2) { width: 400px; height: 300px; bottom: 10%; right: 10%; }
+        .abstract-blob:nth-child(3) { width: 250px; height: 250px; top: 40%; left: 70%; }
+
+        @keyframes slowFloat {
+            from { transform: translateY(0); }
+            to { transform: translateY(-30px); }
+        }
+
+        /* Floating hearts */
+        .floating-heart {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: pink;
+            transform: rotate(-45deg);
+            border-radius: 50% 50% 0 0;
+            animation: heartFloat 8s ease-in-out infinite alternate;
+            opacity: 0.15;
+        }
+        .floating-heart::before,
+        .floating-heart::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: pink;
+            border-radius: 50%;
+        }
+        .floating-heart::before { top: -25px; left: 0; }
+        .floating-heart::after { top: 0; left: 25px; }
+
+        .floating-heart:nth-child(4) { top: 20%; left: 15%; }
+        .floating-heart:nth-child(5) { bottom: 20%; right: 20%; }
+
+        @keyframes heartFloat {
+            from { transform: rotate(-45deg) translateY(0); }
+            to { transform: rotate(-45deg) translateY(-25px); }
+        }
+
+        /* Spinning ring */
+        .spinning-ring {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border: 8px solid rgba(255, 192, 203, 0.3);
+            border-top-color: rgba(255, 105, 180, 0.4);
+            border-radius: 50%;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 10s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Large background heart */
+        .big-heart {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 182, 193, 0.3);
+            top: 20%;
+            right: 15%;
+            transform: rotate(-45deg);
+            border-radius: 50% 50% 0 0;
+            z-index: 0;
+        }
+        .big-heart::before,
+        .big-heart::after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 182, 193, 0.3);
+            border-radius: 50%;
+        }
+        .big-heart::before { top: -100px; left: 0; }
+        .big-heart::after { top: 0; left: 100px; }
+
+        /* Start button */
+        .start-btn {
+            display: block;
+            margin: 160px auto;
+            padding: 22px 48px;
+            background: #ffc2d1;
+            color: #8b0000;
+            font-size: 28px;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+        .start-btn:hover {
+            background: #fbb6c2;
+            transform: scale(1.05);
+        }
+
+        /* Score card */
+        .scorecard {
+            background: rgba(255, 240, 245, 0.6);
+            border: 1px solid #ff99aa;
+            border-radius: 16px;
+            padding: 16px 32px;
+            font-size: 24px;
+            color: #d6336c;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .quiz-container {
+            display: none;
+            text-align: center;
+            padding: 80px 20px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .question {
+            font-size: 32px;
+            font-family: 'Playfair Display', serif;
+            color: #c2185b;
+            margin-bottom: 40px;
+        }
+
+        .answers button {
+            display: block;
+            margin: 16px auto;
+            padding: 14px 28px;
+            font-size: 22px;
+            border-radius: 12px;
+            border: 2px solid #ffc0cb;
+            background-color: #fff0f5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .answers button:hover {
+            background-color: #ffe4ec;
+            transform: scale(1.05);
+        }
+
+        .plus100 {
+            position: fixed;
+            font-size: 20px;
+            color: green;
+            animation: floatUp 2s ease forwards;
+            z-index: 999;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        #miniGame {
+            display: none;
+            text-align: center;
+            position: relative;
+            height: 500px;
+            overflow: hidden;
+        }
+
+        .heart {
+            width: 40px;
+            height: 40px;
+            background: pink;
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: rotate(-45deg);
+            border-radius: 50% 50% 0 0;
+            cursor: pointer;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: pink;
+            border-radius: 50%;
+        }
+
+        .heart::before { top: -20px; left: 0; }
+        .heart::after { top: 0; left: 20px; }
+    </style>
+</head>
+<body>
+    <div class="background-decor">
+        <div class="abstract-blob"></div>
+        <div class="abstract-blob"></div>
+        <div class="abstract-blob"></div>
+        <div class="floating-heart"></div>
+        <div class="floating-heart"></div>
+        <div class="spinning-ring"></div>
+        <div class="big-heart"></div>
+    </div>
+
+    <div class="scorecard" id="score">Score: 0</div>
+    <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+
+    <div class="quiz-container" id="quizContainer">
+        <div class="question" id="questionText">Loading...</div>
+        <div class="answers" id="answerButtons"></div>
+    </div>
+
+    <div id="miniGame">
+        <h2>Click the hearts to catch 'em!</h2>
+    </div>
+    <div id="certificate" style="display:none; text-align:center; padding:40px;">
+        <div id="certDesign" style="width:600px; margin:auto; padding:40px; border:6px solid #ffb6c1; border-radius:20px; background:#fff0f5; font-family:'Playfair Display', serif; color:#c2185b;">
+            <h1 style="font-size:36px;">💖 Love Certificate 💖</h1>
+            <p style="font-size:22px;">This certifies the completion of the <strong>Our Love Quiz</strong>.</p>
+            <p style="font-size:20px;">Awarded with a love score of:</p>
+            <h2 id="certScore" style="font-size:34px; margin:20px 0;">0 / 700</h2>
+            <p style="font-size:20px;">You are officially<br><strong>the Love of My Life 💞</strong></p>
+            <p style="font-style:italic; margin-top:30px;">With all my heart,</p>
+            <h3 style="margin-top:0;">ABK</h3>
+        </div>
+        <button onclick="downloadCertificate()" style="margin-top:20px; padding:12px 24px; font-size:18px; border:none; background:#ffc2d1; color:#8b0000; border-radius:10px; cursor:pointer;">Download Certificate</button>
+    </div>
+    
+
+    <script>
+        const questions = [
+            { type: 'fill', text: '1. When was our first kiss [DD.M.YY] ?', answer: '19.3.24' },
+            { type: 'mcq', text: '2. Why did we fight first ?', options: ['Cause I am a stupid fucker.', 'Cause you didn\'t meant the love you , you said.'], correct: 1 },
+            { type: 'fill', text: '3. What is our daughter\'s name?', answer: 'Karthicka Lekshmi' },
+            { type: 'fill', text: '4. What movie did you suggest first and i loved it ?', answer: ['hi nanna', 'nana', 'nanna', 'naana'] },
+            { type: 'mcq', text: '5. Who do I love the most ?', options: ['Kamal', 'Andrea', 'None of these'], correct: 2, special: true },
+            { type: 'mcq', text: '6. Will you be my partner forever ?', options: ['Yes', 'No'], correct: 0, playful: true },
+            { type: 'mcq', text: '7. Who loves more ?', options: ['abk', 'abk', 'abk', 'abk'], correct: 0 }
+        ];
+
+        let currentQ = 0, score = 0;
+
+        function startQuiz() {
+            document.querySelector('.start-btn').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQ];
+            const questionText = document.getElementById('questionText');
+            const answerButtons = document.getElementById('answerButtons');
+            questionText.innerHTML = q.text;
+            answerButtons.innerHTML = '';
+
+            if (q.type === 'fill') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'Type your answer...';
+                input.style.padding = '10px';
+                input.style.borderRadius = '10px';
+                answerButtons.appendChild(input);
+                const btn = document.createElement('button');
+                btn.innerText = 'Submit';
+                btn.onclick = () => {
+                    const val = input.value.trim().toLowerCase();
+                    const correct = Array.isArray(q.answer) ? q.answer.some(ans => val.includes(ans)) : val === q.answer.toLowerCase();
+                    handleAnswer(correct);
+                };
+                answerButtons.appendChild(btn);
+            } else {
+                q.options.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.innerText = opt;
+
+                    if (q.special && i === 2) {
+                        btn.style.transform = 'scale(0.6)';
+                        btn.onclick = () => {
+                            showPopup('Yeah it’s youuu!');
+                            setTimeout(() => handleAnswer(true), 3000);
+                        };
+                    } else if (q.special) {
+                        btn.onclick = () => {
+                            showPopup('No it’s you.');
+                            setTimeout(() => handleAnswer(false), 2000);
+                        };
+                    } else if (q.playful && i === 1) {
+                        btn.onclick = () => {
+                            btn.innerText = 'Yes';
+                            setTimeout(() => handleAnswer(true), 2000);
+                        };
+                    } else {
+                        btn.onclick = () => handleAnswer(i === q.correct);
+                    }
+
+                    answerButtons.appendChild(btn);
+                });
+            }
+        }
+
+        function handleAnswer(correct) {
+            if (correct) {
+                floatPlus100();
+                score += 100;
+                document.getElementById('score').innerText = 'Score: ' + score;
+            }
+
+            currentQ++;
+            if (currentQ === 5) {
+                launchMiniGame();
+            } else if (currentQ < questions.length) {
+                setTimeout(showQuestion, 2000);
+            } else {
+                setTimeout(endMessage, 2000);
+            }
+        }
+
+        function floatPlus100() {
+            const scoreEl = document.getElementById('score');
+            const plus = document.createElement('div');
+            plus.innerText = '+100';
+            plus.className = 'plus100';
+            const rect = scoreEl.getBoundingClientRect();
+            plus.style.left = rect.left + 60 + 'px';
+            plus.style.top = rect.top + 'px';
+            document.body.appendChild(plus);
+            setTimeout(() => plus.remove(), 2000);
+        }
+
+        function showPopup(msg) {
+            const popup = document.createElement('div');
+            popup.innerText = msg;
+            popup.style.position = 'fixed';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.background = '#fff';
+            popup.style.padding = '20px';
+            popup.style.borderRadius = '12px';
+            popup.style.zIndex = 999;
+            popup.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 3000);
+        }
+
+        function launchMiniGame() {
+            document.getElementById('quizContainer').style.display = 'none';
+            const miniGame = document.getElementById('miniGame');
+            miniGame.style.display = 'block';
+            for (let i = 0; i < 7; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.style.left = Math.random() * 90 + '%';
+                    document.getElementById('miniGame').appendChild(heart);
+                    let top = -50;
+                    const interval = setInterval(() => {
+                        if (top > 450) {
+                            clearInterval(interval);
+                            heart.remove();
+                        } else {
+                            top += 5;
+                            heart.style.top = top + 'px';
+                        }
+                    }, 30);
+                    heart.onclick = () => {
+                        floatPlus100();
+                        score += 100;
+                        document.getElementById('score').innerText = 'Score: ' + score;
+                        heart.remove();
+                    };
+                }, i * 1000);
+            }
+            setTimeout(() => {
+                miniGame.innerHTML = '<h2>Mini game over 💖</h2>';
+                setTimeout(() => {
+                    miniGame.style.display = 'none';
+                    document.getElementById('quizContainer').style.display = 'block';
+                    showQuestion();
+                }, 2000);
+            }, 10000);
+        }
+
+        function endMessage() {
+    document.getElementById('quizContainer').style.display = 'none';
+    document.getElementById('certificate').style.display = 'block';
+    document.getElementById('certScore').innerText = `${score} / 700`;
+}
+
+    </script><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+</body>
+</html>
