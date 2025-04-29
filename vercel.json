@@ -1,0 +1,6 @@
+{
+    "rewrites": [
+      { "source": "/", "destination": "/final_love_quiz.html" }
+    ]
+  }
+  
